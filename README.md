@@ -1,0 +1,249 @@
+## Docker compose with an example 
+
+Q? Why docker compose ? 
+Set of container which are running set of services inside and these container are depended on each other and here 
+each container has its own configuration 
+
+So to run all these microservices inside a big service we use docker compose 
+
+## Lets start the docker compose journey 
+
+Step-1: 
+Create a docker network 
+```terminal
+//code
+--docker network create myNetwork 
+--docker network ls 
+```
+
+//img 
+
+
+
+Step-2:On that docker network create new two containers 
+
+Here we create two container because it will shows us how these two container depend on each other 
+for more clarity mongo-express depends on the mongodb (bcuz if you don't have database then what you will work on ).
+
+
+
+
+//First container
+Start a mongodb container. 
+
+//code
+docker run -d 
+-p 27017:27017 
+-e MONGO_INITDB_ROOT_USERNAME=admin 
+-e MONGO_INITDB_ROOT_PASSWORD=supersecret 
+--network myNetwork 
+--name mongodb mongo
+
+Let me explain each word in this command one by one , 
+docker : just a command like npm , npx , pip ...etc for terminals 
+-d : To start the process in the background 
+-p : Means to assign the port of the container to your local machine's container
+(Note: Mongodb and services like these run on their default ports )
+-e : Environment variables (hidden things like passwords and username or any private info.)
+--network: Specify the network name , if you have created the network then you can write that or else 
+by default the network is created , and to more detail you can decide the network driver for yourselves like the 
+default network driver is bridge it can be host , null etc...
+"--name" : Name of your container ,can be anything.
+<image_name> : After the above command you can directly write which image you want to use and if you don't have it installed then it will get the image from the docker hub and make a container with name of your choice.  
+ 
+
+//Second container
+Start a mongo express container. 
+
+//code
+--docker run -d 
+-p 8081:8081 
+-e ME_CONFIG_MONGODB_ADMINUSERNAME=admin 
+-e ME_CONFIG_MONGODB_ADMINPASSWORD=supersecret 
+-e ME_CONFIG_MONGODB_SERVER=mongodb 
+--network myNetwork 
+--name mongo-express mongo-express
+
+Since we are going to work with mongo express it has to get connected with the mongodb in general to do that we need to provide the same environment credentials (-e) as we provided in the mongodb command so that mongodb and mongodb express are working together. 
+
+
+Step-3: Check if you are actually able to connect to your database 
+
+Open mongo express server in your local machine 
+//link 
+localhost:8081
+Then it will ask for your username and password in prompt ... 
+First know your username , for me its "admin" and password is "pass" and you can check yours by command 
+
+//code
+docker logs mongo-express
+
+
+Here we only have two container but imagine if you have 10 or 20 container if you working with an organization and all these container depend on each other , and now imagine you have to stop all these container , so this is a lot of manual work and you have write a lots of command for each container so this is were docker compose kick in . 
+
+with docker compose you define a file called as docker-compose.yaml where you defined all the different services you are using and what's suppose run . 
+
+As you have defined environment variables and the image name , ports maybe want to use a docker volume just everything in that one file , 
+
+So if you are working with a big company with more than 10 docker container you can make a docker-compose.yaml file and enter all the necessary services and image inside it. 
+
+For learning purposes we are only using two container . 
+
+Let see how we can create a docker-compose.yaml file step by step 
+
+This is the command that we entered for mongodb 
+
+//code 
+docker run -d 
+-p 27017:27017 
+-e MONGO_INITDB_ROOT_USERNAME=admin 
+-e MONGO_INITDB_ROOT_PASSWORD=supersecret 
+--network myNetwork 
+--name mongodb mongo
+
+          |
+          |
+          V
+
+This above command can be written as : 
+
+
+//code 
+
+version :'3.1'
+
+services:
+	mongodb:
+		image:mongo
+		ports:
+   		  -27017:-27017
+		environment:
+		  -MONGO_INITDB_ROOT_USERNAME=admin
+		  -MONGO_INITDB_ROOT_PASSWORD=password
+
+and similarly for the mongo-express commands we ran : 
+
+//code --docker run -d 
+-p 8081:8081 
+-e ME_CONFIG_MONGODB_ADMINUSERNAME=admin 
+-e ME_CONFIG_MONGODB_ADMINPASSWORD=supersecret 
+-e ME_CONFIG_MONGODB_SERVER=mongodb 
+--network myNetwork 
+--name mongo-express mongo-express
+
+          |
+          |
+          V
+
+This above command can be written as : 
+
+//code
+	mongo-express:
+		image:mogo-express
+		ports:
+		  - 8081:8081
+		environment:
+		  - ME_CONFIG_MONGODB_ADMINUSERNAME=admin 
+		  - ME_CONFIG_MONGODB_ADMINPASSWORD=supersecret 
+		  - ME_CONFIG_MONGODB_SERVER=mongodb 
+
+
+
+
+One thing you can notice is that we didn' t give the network requirements , here the docker-compose will itself create the network such that conatiners defined run in one shared network, 
+
+
+Step-4 : Remove and stop all the containers that are working and also remove the 
+
+//code 
+
+docker stop <container_id_1> <container_id_2>  
+
+//code 
+
+docker rm <container_id_1> <container_id_2>
+
+//code 
+
+docker network rm mynetwork 
+
+Then execute the dockercompse file in the terminal 
+
+//code 
+
+docker-compose -f mongo-sevices.yaml up 
+
+here 
+-f : means the file-name of which yaml you created 
+
+Now a lots of things will appear in the terminal if you have everything right and just in case if you encounter any error then , it must be with the .yaml file so for final confirmation here is the full mongo-services.yaml file
+
+//code 
+
+version: "3.1"
+
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: supersecret
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: supersecret
+      ME_CONFIG_MONGODB_SERVER: mongodb
+
+
+
+and to cross check you can run the below command and see ... 
+
+//code 
+docker network ls 
+
+an extra docker-compose-default file will be made 
+
+//code 
+
+docker container ls 
+
+two new container will be up and running 
+
+and if you want to stop all the containers then use this command 
+
+//code 
+docker-compose -f mongo-services.yaml up 
+
+docker-compose -f <file_name> down
+
+
+Step-5: As we know that these containers does not save data when we close them so we use docker volume for persistant
+
+And the easiest way to do that is -> 
+
+First , 
+//code 
+docker-compose -f <file_name> up
+
+Then close it
+//code
+docker-compose -f <file_name> down
+
+Next, 
+//code 
+docker-compose -f <file_name> start 
+
+Now , if you create a database it will be stored , and if you have docker desktop then in the volume sidebar you see your data of container being stored 
+
+and hence if you have to stop storing data then use this command
+
+docker-compose -f <file_name> stop
+
+so , That basically the difference between up,down and start , stop . 
