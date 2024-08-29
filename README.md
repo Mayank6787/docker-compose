@@ -8,19 +8,16 @@ So to run all these microservices inside a big service we use docker compose
 
 ## Lets start the docker compose journey 
 
-Step-1: 
+## Step-1: 
 Create a docker network 
 ```ruby
-//code
---docker network create myNetwork 
---docker network ls 
+
+docker network create myNetwork
+
+docker network ls 
 ```
 
-//img 
-
-
-
-Step-2:On that docker network create new two containers 
+## Step-2:On that docker network create new two containers 
 
 Here we create two container because it will shows us how these two container depend on each other 
 for more clarity mongo-express depends on the mongodb (bcuz if you don't have database then what you will work on ).
@@ -30,14 +27,16 @@ for more clarity mongo-express depends on the mongodb (bcuz if you don't have da
 
 //First container
 Start a mongodb container. 
-
-//code
+```ruby
 docker run -d 
 -p 27017:27017 
 -e MONGO_INITDB_ROOT_USERNAME=admin 
 -e MONGO_INITDB_ROOT_PASSWORD=supersecret 
 --network myNetwork 
 --name mongodb mongo
+```
+
+
 
 Let me explain each word in this command one by one , 
 docker : just a command like npm , npx , pip ...etc for terminals 
@@ -54,29 +53,32 @@ default network driver is bridge it can be host , null etc...
 
 //Second container
 Start a mongo express container. 
-
-//code
---docker run -d 
+```ruby
+docker run -d 
 -p 8081:8081 
 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin 
 -e ME_CONFIG_MONGODB_ADMINPASSWORD=supersecret 
 -e ME_CONFIG_MONGODB_SERVER=mongodb 
 --network myNetwork 
 --name mongo-express mongo-express
+```
+
+
 
 Since we are going to work with mongo express it has to get connected with the mongodb in general to do that we need to provide the same environment credentials (-e) as we provided in the mongodb command so that mongodb and mongodb express are working together. 
 
 
-Step-3: Check if you are actually able to connect to your database 
+## Step-3: Check if you are actually able to connect to your database 
 
-Open mongo express server in your local machine 
-//link 
-localhost:8081
+Open mongo express server in your local machine ![localhost](localhost:8081)
+
 Then it will ask for your username and password in prompt ... 
 First know your username , for me its "admin" and password is "pass" and you can check yours by command 
 
-//code
+```ruby
 docker logs mongo-express
+
+```
 
 
 Here we only have two container but imagine if you have 10 or 20 container if you working with an organization and all these container depend on each other , and now imagine you have to stop all these container , so this is a lot of manual work and you have write a lots of command for each container so this is were docker compose kick in . 
@@ -93,14 +95,14 @@ Let see how we can create a docker-compose.yaml file step by step
 
 This is the command that we entered for mongodb 
 
-//code 
+```ruby
 docker run -d 
 -p 27017:27017 
 -e MONGO_INITDB_ROOT_USERNAME=admin 
 -e MONGO_INITDB_ROOT_PASSWORD=supersecret 
 --network myNetwork 
 --name mongodb mongo
-
+```
           |
           |
           V
@@ -108,8 +110,8 @@ docker run -d
 This above command can be written as : 
 
 
-//code 
 
+```ruby
 version :'3.1'
 
 services:
@@ -120,16 +122,20 @@ services:
 		environment:
 		  -MONGO_INITDB_ROOT_USERNAME=admin
 		  -MONGO_INITDB_ROOT_PASSWORD=password
+```
+
 
 and similarly for the mongo-express commands we ran : 
 
-//code --docker run -d 
+```ruby
+docker run -d 
 -p 8081:8081 
 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin 
 -e ME_CONFIG_MONGODB_ADMINPASSWORD=supersecret 
 -e ME_CONFIG_MONGODB_SERVER=mongodb 
 --network myNetwork 
 --name mongo-express mongo-express
+```
 
           |
           |
@@ -137,7 +143,7 @@ and similarly for the mongo-express commands we ran :
 
 This above command can be written as : 
 
-//code
+```ruby
 	mongo-express:
 		image:mogo-express
 		ports:
@@ -146,6 +152,8 @@ This above command can be written as :
 		  - ME_CONFIG_MONGODB_ADMINUSERNAME=admin 
 		  - ME_CONFIG_MONGODB_ADMINPASSWORD=supersecret 
 		  - ME_CONFIG_MONGODB_SERVER=mongodb 
+```
+
 
 
 
@@ -153,33 +161,32 @@ This above command can be written as :
 One thing you can notice is that we didn' t give the network requirements , here the docker-compose will itself create the network such that conatiners defined run in one shared network, 
 
 
-Step-4 : Remove and stop all the containers that are working and also remove the 
+## Step-4 : Remove and stop all the containers that are working and also remove the 
 
-//code 
+```ruby
+docker stop <container_id_1> <container_id_2> 
+``` 
 
-docker stop <container_id_1> <container_id_2>  
-
-//code 
-
+```ruby
 docker rm <container_id_1> <container_id_2>
+```
 
-//code 
-
+```ruby
 docker network rm mynetwork 
+```
 
 Then execute the dockercompse file in the terminal 
 
-//code 
-
+```ruby
 docker-compose -f mongo-sevices.yaml up 
+```
 
 here 
 -f : means the file-name of which yaml you created 
 
 Now a lots of things will appear in the terminal if you have everything right and just in case if you encounter any error then , it must be with the .yaml file so for final confirmation here is the full mongo-services.yaml file
 
-//code 
-
+```ruby
 version: "3.1"
 
 services:
@@ -201,30 +208,32 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: supersecret
       ME_CONFIG_MONGODB_SERVER: mongodb
 
+```
 
 
 and to cross check you can run the below command and see ... 
 
-//code 
+```ruby
 docker network ls 
+```
 
 an extra docker-compose-default file will be made 
 
-//code 
-
+```ruby
 docker container ls 
+```
 
 two new container will be up and running 
 
 and if you want to stop all the containers then use this command 
 
-//code 
+```ruby
 docker-compose -f mongo-services.yaml up 
 
 docker-compose -f <file_name> down
+```
 
-
-Step-5: As we know that these containers does not save data when we close them so we use docker volume for persistant
+## Step-5: As we know that these containers does not save data when we close them so we use docker volume for persistant
 
 And the easiest way to do that is -> 
 
