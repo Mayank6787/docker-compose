@@ -70,7 +70,7 @@ Since we are going to work with mongo express it has to get connected with the m
 
 ## Step-3: Check if you are actually able to connect to your database 
 
-Open mongo express server in your local machine ![localhost](localhost:8081)
+Open mongo express server in your local machine [localhost](localhost:8081)
 
 Then it will ask for your username and password in prompt ... 
 First know your username , for me its "admin" and password is "pass" and you can check yours by command 
