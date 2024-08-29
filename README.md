@@ -238,16 +238,22 @@ docker-compose -f <file_name> down
 And the easiest way to do that is -> 
 
 First , 
-//code 
+```ruby
 docker-compose -f <file_name> up
+```
+
 
 Then close it
-//code
+```ruby
 docker-compose -f <file_name> down
+```
+
 
 Next, 
-//code 
+```ruby
 docker-compose -f <file_name> start 
+```
+
 
 Now , if you create a database it will be stored , and if you have docker desktop then in the volume sidebar you see your data of container being stored 
 
