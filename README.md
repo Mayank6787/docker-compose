@@ -259,6 +259,9 @@ Now , if you create a database it will be stored , and if you have docker deskto
 
 and hence if you have to stop storing data then use this command
 
+```ruby
 docker-compose -f <file_name> stop
+```
+
 
 so , That basically the difference between up,down and start , stop . 
