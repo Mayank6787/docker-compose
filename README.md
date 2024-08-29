@@ -10,7 +10,7 @@ So to run all these microservices inside a big service we use docker compose
 
 Step-1: 
 Create a docker network 
-```terminal
+```bash
 //code
 --docker network create myNetwork 
 --docker network ls 
