@@ -40,13 +40,18 @@ docker run -d
 
 Let me explain each word in this command one by one , 
 docker : just a command like npm , npx , pip ...etc for terminals 
+
 -d : To start the process in the background 
+
 -p : Means to assign the port of the container to your local machine's container
 (Note: Mongodb and services like these run on their default ports )
+
 -e : Environment variables (hidden things like passwords and username or any private info.)
+
 --network: Specify the network name , if you have created the network then you can write that or else 
 by default the network is created , and to more detail you can decide the network driver for yourselves like the 
 default network driver is bridge it can be host , null etc...
+
 "--name" : Name of your container ,can be anything.
 <image_name> : After the above command you can directly write which image you want to use and if you don't have it installed then it will get the image from the docker hub and make a container with name of your choice.  
  
