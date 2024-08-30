@@ -265,3 +265,5 @@ docker-compose -f <file_name> stop
 
 
 so , That basically the difference between up,down and start , stop . 
+
+Thank you 💮
