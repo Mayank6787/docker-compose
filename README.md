@@ -39,9 +39,10 @@ docker run -d
 
 
 Let me explain each word in this command one by one , 
+
 docker : just a command like npm , npx , pip ...etc for terminals 
 
--d : To start the process in the background 
+ -d : To start the process in the background 
 
 -p : Means to assign the port of the container to your local machine's container
 (Note: Mongodb and services like these run on their default ports )
